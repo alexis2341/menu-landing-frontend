@@ -18,7 +18,7 @@ function App() {
     setEstado("Enviando...");
 
     try {
-      const res = await fetch("http://localhost:5000/addUser", {
+      const response = await fetch('https://menu-landing-backend.onrender.com/addUser' , {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
