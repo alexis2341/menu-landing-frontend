@@ -26,7 +26,7 @@ function App() {
         body: JSON.stringify(form),
       });
 
-      if (res.ok) {
+      if (response.ok) {
         setEstado("¡Registro exitoso!");
         setForm({ nombre: "", email: "", telefono: "" });
       } else {
