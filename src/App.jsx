@@ -1,5 +1,6 @@
 import { useState } from "react";
 import ReCAPTCHA from "react-google-recaptcha";
+import emailjs from "@emailjs/browser";
 
 function App() {
   const [form, setForm] = useState({
@@ -9,48 +10,55 @@ function App() {
   });
 
   const [estado, setEstado] = useState("");
+  const [captchaValue, setCaptchaValue] = useState(null);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
-  const [captchaValue, setCaptchaValue] = useState(null);
 
-const handleCaptcha = (value) => {
-  setCaptchaValue(value);
-};
+  const handleCaptcha = (value) => {
+    setCaptchaValue(value);
+  };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setEstado("Enviando...");
 
-  if (!captchaValue) {
-    setEstado("Por favor, valida el CAPTCHA.");
-    return;
-  }
+    // Agregar la fecha actual
+    const fecha = new Date().toLocaleString();
 
-  setEstado("Enviando...");
+    try {
+      // 1. Enviar los datos al backend
+      const response = await fetch("https://menu-landing-backend.onrender.com/addUser", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...form, fecha }),
+      });
 
-  try {
-    const response = await fetch('https://menu-landing-backend.onrender.com/addUser', {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ ...form, captcha: captchaValue }), // ✅ enviamos también el captcha
-    });
+      if (response.ok) {
+        // 2. Enviar el email con EmailJS
+        await emailjs.send(
+          "service_lqlw5wk",          // Service ID
+          "template_0sb5w7j",         // Template ID
+          {
+            nombre: form.nombre,
+            email: form.email,
+            telefono: form.telefono,
+            fecha: fecha,
+          },
+          "xdqQBMmoWcDcb4tYf"         // Public Key
+        );
 
-    if (response.ok) {
-      setEstado("¡Registro exitoso!");
-      setForm({ nombre: "", email: "", telefono: "" });
-      setCaptchaValue(null); // limpia captcha
-    } else {
-      setEstado("Error al enviar.");
+        setEstado("¡Registro exitoso!");
+        setForm({ nombre: "", email: "", telefono: "" });
+      } else {
+        setEstado("Error al enviar al servidor.");
+      }
+    } catch (err) {
+      console.error(err);
+      setEstado("Error de conexión.");
     }
-  } catch (err) {
-    console.error(err);
-    setEstado("Error de conexión.");
-  }
-};
-
+  };
 
   return (
     <div style={{ padding: "2rem", fontFamily: "sans-serif" }}>
@@ -82,11 +90,13 @@ const handleSubmit = async (e) => {
         />
         <br />
         <ReCAPTCHA
-  sitekey="6LeMYj4rAAAAAOhRkyrRKSVxLlV0ffjAQEMx2sjZ"
-  onChange={handleCaptcha}
-/>
-
-        <button type="submit">Enviar</button>
+          sitekey="TU_CLAVE_DEL_CLIENTE_RECAPTCHA"
+          onChange={handleCaptcha}
+        />
+        <br />
+        <button type="submit" disabled={!captchaValue}>
+          Enviar
+        </button>
       </form>
       <p>{estado}</p>
     </div>
