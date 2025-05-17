@@ -90,7 +90,7 @@ function App() {
         />
         <br />
         <ReCAPTCHA
-          sitekey="TU_CLAVE_DEL_CLIENTE_RECAPTCHA"
+          sitekey="6LeMYj4rAAAAAOhRkyrRKSVxLlV0ffjAQEMx2sjZ"
           onChange={handleCaptcha}
         />
         <br />
@@ -104,3 +104,10 @@ function App() {
 }
 
 export default App;
+
+
+
+
+
+
+
