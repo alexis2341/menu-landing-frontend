@@ -1,4 +1,5 @@
 import { useState } from "react";
+import ReCAPTCHA from "react-google-recaptcha";
 
 function App() {
   const [form, setForm] = useState({
@@ -12,31 +13,44 @@ function App() {
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
+  const [captchaValue, setCaptchaValue] = useState(null);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setEstado("Enviando...");
+const handleCaptcha = (value) => {
+  setCaptchaValue(value);
+};
 
-    try {
-      const response = await fetch('https://menu-landing-backend.onrender.com/addUser' , {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(form),
-      });
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-      if (response.ok) {
-        setEstado("¡Registro exitoso!");
-        setForm({ nombre: "", email: "", telefono: "" });
-      } else {
-        setEstado("Error al enviar.");
-      }
-    } catch (err) {
-      console.error(err);
-      setEstado("Error de conexión.");
+  if (!captchaValue) {
+    setEstado("Por favor, valida el CAPTCHA.");
+    return;
+  }
+
+  setEstado("Enviando...");
+
+  try {
+    const response = await fetch('https://menu-landing-backend.onrender.com/addUser', {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ ...form, captcha: captchaValue }), // ✅ enviamos también el captcha
+    });
+
+    if (response.ok) {
+      setEstado("¡Registro exitoso!");
+      setForm({ nombre: "", email: "", telefono: "" });
+      setCaptchaValue(null); // limpia captcha
+    } else {
+      setEstado("Error al enviar.");
     }
-  };
+  } catch (err) {
+    console.error(err);
+    setEstado("Error de conexión.");
+  }
+};
+
 
   return (
     <div style={{ padding: "2rem", fontFamily: "sans-serif" }}>
@@ -67,6 +81,11 @@ function App() {
           required
         />
         <br />
+        <ReCAPTCHA
+  sitekey="6LeMYj4rAAAAAOhRkyrRKSVxLlV0ffjAQEMx2sjZ"
+  onChange={handleCaptcha}
+/>
+
         <button type="submit">Enviar</button>
       </form>
       <p>{estado}</p>
