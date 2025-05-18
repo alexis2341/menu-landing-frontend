@@ -29,7 +29,7 @@ function App() {
       const response = await fetch("https://menu-landing-backend.onrender.com/addUser", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, fecha }),
+        body: JSON.stringify({ ...form, fecha, captcha: captchaValue }), // Añadido captcha aquí
       });
 
       if (response.ok) {
