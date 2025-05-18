@@ -2,12 +2,7 @@ import { useState } from "react";
 import ReCAPTCHA from "react-google-recaptcha";
 
 function App() {
-  const [form, setForm] = useState({
-    nombre: "",
-    email: "",
-    telefono: "",
-  });
-
+  const [form, setForm] = useState({ nombre: "", email: "", telefono: "" });
   const [estado, setEstado] = useState("");
   const [captchaValue, setCaptchaValue] = useState(null);
 
@@ -15,38 +10,34 @@ function App() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleCaptcha = (value) => {
-    setCaptchaValue(value);
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setEstado("Enviando...");
-
-    const fecha = new Date().toLocaleString();
 
     try {
       const response = await fetch("https://menu-landing-backend.onrender.com/addUser", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, fecha, captcha: captchaValue }), // Añadido captcha aquí
+        body: JSON.stringify({ ...form, captcha: captchaValue }),
       });
+
+      const data = await response.json();
 
       if (response.ok) {
         setEstado("¡Registro exitoso!");
         setForm({ nombre: "", email: "", telefono: "" });
       } else {
-        setEstado("Error al enviar al servidor.");
+        setEstado(data.error || "Error al enviar datos");
       }
     } catch (err) {
+      setEstado("Error de conexión con el servidor");
       console.error(err);
-      setEstado("Error de conexión.");
     }
   };
 
   return (
     <div style={{ padding: "2rem", fontFamily: "sans-serif" }}>
-      <h1>Registrate para obtener acceso gratuito</h1>
+      <h1>Regístrate para obtener acceso gratuito</h1>
       <form onSubmit={handleSubmit}>
         <input
           name="nombre"
@@ -75,7 +66,7 @@ function App() {
         <br />
         <ReCAPTCHA
           sitekey="6LeMYj4rAAAAAOhRkyrRKSVxLlV0ffjAQEMx2sjZ"
-          onChange={handleCaptcha}
+          onChange={(value) => setCaptchaValue(value)}
         />
         <br />
         <button type="submit" disabled={!captchaValue}>
