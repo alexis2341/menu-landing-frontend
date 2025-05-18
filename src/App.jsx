@@ -1,6 +1,5 @@
 import { useState } from "react";
 import ReCAPTCHA from "react-google-recaptcha";
-import emailjs from "@emailjs/browser";
 
 function App() {
   const [form, setForm] = useState({
@@ -24,11 +23,9 @@ function App() {
     e.preventDefault();
     setEstado("Enviando...");
 
-    // Agregar la fecha actual
     const fecha = new Date().toLocaleString();
 
     try {
-      // 1. Enviar los datos al backend
       const response = await fetch("https://menu-landing-backend.onrender.com/addUser", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -36,19 +33,6 @@ function App() {
       });
 
       if (response.ok) {
-        // 2. Enviar el email con EmailJS
-        await emailjs.send(
-          "service_lqlw5wk",          // Service ID
-          "template_0sb5w7j",         // Template ID
-          {
-            nombre: form.nombre,
-            email: form.email,
-            telefono: form.telefono,
-            fecha: fecha,
-          },
-          "xdqQBMmoWcDcb4tYf"         // Public Key
-        );
-
         setEstado("¡Registro exitoso!");
         setForm({ nombre: "", email: "", telefono: "" });
       } else {
@@ -104,10 +88,3 @@ function App() {
 }
 
 export default App;
-
-
-
-
-
-
-
